@@ -13,7 +13,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
-
 function compose_email() {
 
   // Show compose view and hide other views
@@ -43,6 +42,7 @@ function send_mail() {
   })
   .then(response => response.json())
   .then(result => {
+    // check if error 
     if ("error" in result) {
       alert(result['error']);
       console.log(result);
@@ -50,6 +50,7 @@ function send_mail() {
 
   }
     else {
+      //if email sent return to sent mail box
       console.log(result);
       load_mailbox('sent');
     }
@@ -74,6 +75,7 @@ function load_mailbox(mailbox) {
 
    // Show the mailbox name
    document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
+
    fetch(`/emails/${mailbox}`)
    .then(response => response.json())
    .then(emails => {
@@ -88,7 +90,7 @@ function load_mailbox(mailbox) {
          <div class="p-2">${email.subject}</div>
          <div class="ml-auto p-2">${email.timestamp}</div>
          </div>`;
-
+        
         // when user view sent emails
         if(`${mailbox}`=== 'sent') {
           element.innerHTML += `
@@ -107,11 +109,101 @@ function load_mailbox(mailbox) {
             element.style.backgroundColor = "#cccccc";
            }
         }
-         document.querySelector('#emails-view').append(element);      
+        element.addEventListener('click', () => view_mail(email.id, mailbox));
+        document.querySelector('#emails-view').append(element);  
+        
        })
 
       })
    .catch(error => {
      console.log('Error:', error);
    });
+}
+
+function view_mail(id, mailbox) {
+
+   // Show the emial view  and hide other views
+   document.querySelector('#emails-view').style.display = 'none';
+   document.querySelector('#compose-view').style.display = 'none';
+   document.querySelector('#email-view').style.display = 'block';
+   document.querySelector('#email-view').innerHTML='';
+
+  fetch(`/emails/${id}`)
+  .then(response => response.json())
+  .then(email => {
+  // Print email
+    console.log(email);
+    const mail = document.querySelector('#email-view');
+    var e = `${JSON.stringify(email)}`;
+    e = e.replace(/[']/g, "")
+    mail.innerHTML =`
+    <div class="container">
+      <div><p class="font-weight-bold"> From: <span class="font-weight-normal">${email.sender}</span></p></div>
+      <div><p class="font-weight-bold">To: <span class="font-weight-normal">${email.recipients}</span></p></div>
+      <div><p class="font-weight-bold">Subject: <span class="font-weight-normal">${email.subject}</span></p></div>
+      <div><p class="font-weight-bold">Time: <span class="font-weight-normal">${email.timestamp}</span></p></div>
+      <div><button id="replay" onclick='replay(${e})' class="btn btn-sm btn-outline-primary">replay</button></div>
+      <hr>
+      <div style='white-space:pre' class="p-2">${email.body}</div>
+    </div>`;
+
+    // when check inbox user can archive emails
+    if (`${mailbox}`=== 'inbox') {
+      mail.innerHTML += `
+      <div class="container">
+      <button id ="True" onclick=archive(${email.id},this.id); class="btn btn-sm btn-outline-primary">Archive </button>
+      </div>
+      `;
+    }
+    //when check archive user can unarchive emails
+    else if (`${mailbox}`=== 'archive') {
+      mail.innerHTML += `
+      <div class="container">
+      <div><button id="False" onclick=archive(${email.id},this.id); class="btn btn-sm btn-outline-primary">unarchive </button></div>
+      </div>
+      `;
+  }
+  
+})
+.catch(error => {
+  console.log('Error:', error);
+});
+// change email to read
+fetch(`/emails/${id}`, {
+  method: 'PUT',
+  body: JSON.stringify({
+      read: true
+  })
+})
+
+}
+
+function archive(email, button_id){
+  //archive or unarchive email
+  fetch(`/emails/${email}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+        archived: button_id
+    })
+  })
+  .then(()=> load_mailbox('inbox'))
+}
+
+function replay(mail){
+  // display defult values for the replay from original email
+  compose_email();
+  document.querySelector('#compose-recipients').value = `${mail.sender}`;
+  document.querySelector('#compose-body').value = 
+  '\r\n' + `\n \n On ${mail.timestamp} ${mail.sender} wrote:\n ${mail.body}
+   `;
+  let subject = `${mail.subject}`
+   if (subject.search("RE:")=== 0) {
+    document.querySelector('#compose-subject').value = `${mail.subject}`;
+    
+   }
+   else {
+    document.querySelector('#compose-subject').value = `RE: ${mail.subject}`;
+    
+   }
+
 }
