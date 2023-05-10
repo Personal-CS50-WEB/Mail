@@ -16,11 +16,11 @@ Once you’re signed in, you should see yourself taken to the Inbox page of the 
 ### **API**
 This application supports the following API routes:
 
-GET /emails/<str:mailbox>: Sending a GET request to /emails/<mailbox> where <mailbox> is either inbox, sent, or archive will return back to you (in JSON form) a list of all emails in that mailbox, in reverse chronological order.
+- GET /emails/<str:mailbox>: Sending a GET request to /emails/<mailbox> where <mailbox> is either inbox, sent, or archive will return back to you (in JSON form) a list of all emails in that mailbox, in reverse chronological order.
 
-POST /emails: Sending a POST request to /emails with the body containing JSON data including recipients, subject, and body will create a new email and save it to the database.
+- POST /emails: Sending a POST request to /emails with the body containing JSON data including recipients, subject, and body will create a new email and save it to the database.
 
-PUT /emails/<int:email_id>: Sending a PUT request to /emails/<email_id> with the body containing JSON data including archived or read will update the email in the database with the given email_id.
+- PUT /emails/<int:email_id>: Sending a PUT request to /emails/<email_id> with the body containing JSON data including archived or read will update the email in the database with the given email_id.
 
 ## **Credits**
 
