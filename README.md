@@ -5,7 +5,13 @@ This project is a simple email client with functionality to send and receive ema
 ### **Installation**
 To install the necessary dependencies for this project, navigate to the root directory and run:
 
+1. Clone the code: https://github.com/Personal-CS50-WEB/Mail.git
+2. pip install -r requirements.txt
+3. In the terminal, python manage.py makemigrations network to make migrations for the network app.
+4. python manage.py migrate
+5. python manage.py runserver
 `pip install -r requirements.txt`
+
 ### **Usage**
 To start the web server, make and apply migrations for the project, then run:
 `python manage.py runserver`
